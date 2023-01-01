@@ -60,7 +60,8 @@ class RRTTree(object):
         Search for the vertex with the given state and return the index if exists
         @param state state to check if exists.
         '''
-        valid_idxs = [v_idx for v_idx, v in self.vertices.items() if (v.state == state).all()]
+        #valid_idxs = [v_idx for v_idx, v in self.vertices.items() if (v.state == state).all()], this is the original code
+        valid_idxs = [v_idx for v_idx, v in self.vertices.items() if (v.state[0] == state[0] and v.state[1] == state[1])] # this is our fix
         if len(valid_idxs) > 0:
             return valid_idxs[0]
         return None
