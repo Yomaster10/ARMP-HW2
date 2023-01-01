@@ -51,6 +51,8 @@ class RRTStarPlanner(object):
                 # Partial extensions, if enabled
                 if self.ext_mode == 'E2':
                     s, goal_added = self.extend(nearest_vert[1], s) # s = x_new
+                    if not env.state_validity_checker(s):
+                        continue
                 
                 # Does the edge between the sample and its nearest tree node collide with any obstacles?
                 if env.edge_validity_checker(s, nearest_vert[1]):
@@ -91,6 +93,8 @@ class RRTStarPlanner(object):
                                     self.tree.vertices[knn_idxs[i]].cost = potential_new_cost
                                     self.tree.edges[knn_idxs[i]] = s_idx
                                     num_rewires += 1
+                else:
+                    goal_added = False
                     
         if goal_added:
             plan.append(s)
