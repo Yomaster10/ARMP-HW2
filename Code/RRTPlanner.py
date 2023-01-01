@@ -16,7 +16,10 @@ class RRTPlanner(object):
         self.goal_prob = goal_prob
 
         # set step size for extensions
-        self.step_size = 0.2
+        if planning_env.ylimit[1] < 100:
+            self.step_size = 0.2
+        else:
+            self.step_size = 5
 
     def plan(self):
         '''
@@ -50,7 +53,9 @@ class RRTPlanner(object):
                 # Partial extensions, if enabled
                 if self.ext_mode == 'E2':
                     s, goal_added = self.extend(nearest_vert[1], s) # s = x_new
-                
+                    if not env.state_validity_checker(s):
+                        continue
+            
                 # Does the edge between the sample and its nearest tree node collide with any obstacles?
                 if env.edge_validity_checker(s, nearest_vert[1]):
                     s_idx = self.tree.add_vertex(s, nearest_vert)
@@ -58,6 +63,8 @@ class RRTPlanner(object):
                     self.tree.add_edge(nearest_vert_idx,s_idx,cost)
                     if goal == True and self.ext_mode == 'E1':
                         goal_added = True
+                else:
+                    goal_added = False
 
         if goal_added:
             plan.append(s)
@@ -71,7 +78,7 @@ class RRTPlanner(object):
                 parent_state = self.tree.vertices[parent_idx].state
             plan.append(parent_state)
         plan = plan[::-1]
-
+    
         print(f"Total number of iterations needed to reach goal: {num_iter}")
 
         total_time = time.time()-start_time
