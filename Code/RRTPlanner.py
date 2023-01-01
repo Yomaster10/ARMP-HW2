@@ -86,15 +86,17 @@ class RRTPlanner(object):
         print('Total cost of path: {:.3f}'.format(total_cost))
         print('Total time: {:.3f} seconds'.format(total_time))
 
-        if env.start[0] == 10:
-            map = 'M1'
-        elif env.start[0] == 250:
-            map = 'M2'
-        else:
-            map = 'Unknown'
+        update_table = False
+        if update_table:
+            if env.start[0] == 10:
+                map = 'M1'
+            elif env.start[0] == 250:
+                map = 'M2'
+            else:
+                map = 'Unknown'
 
-        #update_table(planner='rrt', map=map, ext_mode=self.ext_mode, goal_bias=self.goal_prob, step_size=self.step_size,
-        #    num_iter=num_iter, time=total_time, cost=total_cost)
+            update_table(planner='rrt', map=map, ext_mode=self.ext_mode, goal_bias=self.goal_prob, step_size=self.step_size,
+                num_iter=num_iter, time=total_time, cost=total_cost)
         return np.array(plan)
 
     def compute_cost(self, plan):

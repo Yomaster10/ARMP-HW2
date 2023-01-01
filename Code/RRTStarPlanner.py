@@ -17,7 +17,10 @@ class RRTStarPlanner(object):
         self.k = k
 
         # set step size for extensions
-        self.step_size = 0.2
+        if planning_env.ylimit[1] < 100:
+            self.step_size = 0.2
+        else:
+            self.step_size = 5
 
     def plan(self):
         '''
@@ -27,6 +30,9 @@ class RRTStarPlanner(object):
         
         env = self.planning_env
         self.tree.add_vertex(env.start)
+
+        if self.k == 0: # log mode
+            log = True
 
         goal_added = False; num_iter = 0; num_rewires = 0; plan = []
         while not goal_added:
@@ -61,7 +67,8 @@ class RRTStarPlanner(object):
                     self.tree.add_edge(nearest_vert_idx,s_idx,cost)
                     if goal == True and self.ext_mode == 'E1':
                         goal_added = True
-                    
+                    if log == True:
+                        self.k = int(2*np.log10(len(self.tree.vertices)))
                     # rewiring phase
                     if len(self.tree.vertices) > self.k:
                         knn_idxs, knn_states = self.tree.get_k_nearest_neighbors(s, self.k)
@@ -118,8 +125,21 @@ class RRTStarPlanner(object):
         print('Total cost of path: {:.3f}'.format(total_cost))
         print('Total time: {:.3f} seconds'.format(total_time))
         
-        update_table(planner='rrtstar', map=1, ext_mode=self.ext_mode, goal_bias=self.goal_prob, step_size=self.step_size,
-            num_iter=num_iter, time=total_time, cost=total_cost, k=self.k, num_rewires=num_rewires)
+        update_table = False
+        if update_table:
+            if env.start[0] == 10:
+                map = 'M1'
+            elif env.start[0] == 250:
+                map = 'M2'
+            else:
+                map = 'Unknown'
+
+            if log==True:
+                self.k='floor[2*log(n)]'
+
+            update_table(planner='rrtstar', map=map, ext_mode=self.ext_mode, goal_bias=self.goal_prob, step_size=self.step_size,
+                num_iter=num_iter, time=total_time, cost=total_cost, k=self.k, num_rewires=num_rewires)
+                
         return np.array(plan)
 
     def compute_cost(self, plan):
