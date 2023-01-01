@@ -14,24 +14,28 @@ if __name__ == "__main__":
     parser.add_argument('-k', '--k', type=int, default=1, help='number of nearest neighbours for RRTStar')
     args = parser.parse_args()
 
-    # prepare the map
-    planning_env = MapEnvironment(json_file=args.map)
+    for _ in range(1):
+        # prepare the map
+        planning_env = MapEnvironment(json_file=args.map)
 
-    # setup the planner
-    if args.planner == 'astar':
-        planner = AStarPlanner(planning_env=planning_env)
-    elif args.planner == 'rrt':
-        planner = RRTPlanner(planning_env=planning_env, ext_mode=args.ext_mode, goal_prob=args.goal_prob)
-    elif args.planner == 'rrtstar':
-        planner = RRTStarPlanner(planning_env=planning_env, ext_mode=args.ext_mode, goal_prob=args.goal_prob, k=args.k)
-    else:
-        raise ValueError('Unknown planner option: %s' % args.planner);
+        # setup the planner
+        if args.planner == 'astar':
+            planner = AStarPlanner(planning_env=planning_env)
+        elif args.planner == 'rrt':
+            planner = RRTPlanner(planning_env=planning_env, ext_mode=args.ext_mode, goal_prob=args.goal_prob)
+        elif args.planner == 'rrtstar':
+            planner = RRTStarPlanner(planning_env=planning_env, ext_mode=args.ext_mode, goal_prob=args.goal_prob, k=args.k)
+        else:
+            raise ValueError('Unknown planner option: %s' % args.planner);
 
-    # execute plan
-    plan = planner.plan()
+        # execute plan
+        plan = planner.plan()
 
     # visualize the final path with edges or states according to the requested planner.
     if args.planner == 'astar':
         planner.planning_env.visualize_map(plan=plan, expanded_nodes=planner.get_expanded_nodes())
     else:
-        planner.planning_env.visualize_map(plan=plan, tree_edges=planner.tree.get_edges_as_states())
+        if args.planner == 'rrt':
+            planner.planning_env.visualize_map(plan=plan, tree_edges=planner.tree.get_edges_as_states(), planner='RRT', map=str(args.map[3]), ext_mode=args.ext_mode, goal_bias=str(args.goal_prob), step_size=str(0.2))
+        elif args.planner == 'rrtstar':
+            planner.planning_env.visualize_map(plan=plan, tree_edges=planner.tree.get_edges_as_states(), planner='RRTStar', map=str(args.map[3]), ext_mode=args.ext_mode, goal_bias=str(args.goal_prob), step_size=str(0.2), k=str(args.k))

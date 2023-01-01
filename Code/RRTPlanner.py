@@ -2,10 +2,11 @@ import numpy as np
 from RRTTree import RRTTree
 import time
 
+from TableCreator import update_table
+
 class RRTPlanner(object):
 
     def __init__(self, planning_env, ext_mode, goal_prob):
-
         # set environment and search tree
         self.planning_env = planning_env
         self.tree = RRTTree(self.planning_env)
@@ -14,6 +15,7 @@ class RRTPlanner(object):
         self.ext_mode = ext_mode
         self.goal_prob = goal_prob
 
+        # set step size for extensions
         self.step_size = 0.2
 
     def plan(self):
@@ -22,17 +24,10 @@ class RRTPlanner(object):
         '''
         start_time = time.time()
 
-        # initialize an empty plan.
-        plan = []
-
-        # TODO: Task 4.4
         env = self.planning_env
         self.tree.add_vertex(env.start)
-        #self.tree.add_vertex(env.goal)
         
-        #N_samples = 100
-        #for _ in range(N_samples):
-        goal_added = False; num_iter = 0
+        goal_added = False; num_iter = 0; plan = []
         while not goal_added:
             num_iter += 1
             goal = False; 
@@ -47,16 +42,14 @@ class RRTPlanner(object):
                 y = np.random.uniform(env.ylimit[0], env.ylimit[1])
                 s = [x,y]
 
-            # Partial extensions, if enabled
-            if self.ext_mode == 'E2':
-                nearest_vert = self.tree.get_nearest_state(s)
-                nearest_vert_idx = nearest_vert[0]
-                s, goal_added = self.extend(nearest_vert[1], s)
-            
             # Is the sample in the free space?
             if env.state_validity_checker(s):
                 nearest_vert = self.tree.get_nearest_state(s)
                 nearest_vert_idx = nearest_vert[0]
+
+                # Partial extensions, if enabled
+                if self.ext_mode == 'E2':
+                    s, goal_added = self.extend(nearest_vert[1], s) # s = x_new
                 
                 # Does the edge between the sample and its nearest tree node collide with any obstacles?
                 if env.edge_validity_checker(s, nearest_vert[1]):
@@ -79,14 +72,22 @@ class RRTPlanner(object):
             plan.append(parent_state)
         plan = plan[::-1]
 
-        #print(self.tree.vertices)
-        #print(self.tree.edges)
         print(f"Total number of iterations needed to reach goal: {num_iter}")
 
-        # print total path cost and time
-        print('Total cost of path: {:.2f}'.format(self.compute_cost(plan)))
-        print('Total time: {:.2f} seconds'.format(time.time()-start_time))
+        total_time = time.time()-start_time
+        total_cost = self.compute_cost(plan)
+        print('Total cost of path: {:.3f}'.format(total_cost))
+        print('Total time: {:.3f} seconds'.format(total_time))
 
+        if env.start[0] == 10:
+            map = 'M1'
+        elif env.start[0] == 250:
+            map = 'M2'
+        else:
+            map = 'Unknown'
+
+        #update_table(planner='rrt', map=map, ext_mode=self.ext_mode, goal_bias=self.goal_prob, step_size=self.step_size,
+        #    num_iter=num_iter, time=total_time, cost=total_cost)
         return np.array(plan)
 
     def compute_cost(self, plan):

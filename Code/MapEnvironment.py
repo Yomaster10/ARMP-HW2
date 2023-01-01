@@ -119,7 +119,7 @@ class MapEnvironment(object):
     # Visualization Functions
     # ------------------------#
 
-    def visualize_map(self, show_map=False, plan=None, tree_edges=None, expanded_nodes=None):
+    def visualize_map(self, show_map=False, plan=None, tree_edges=None, expanded_nodes=None, planner=None, map=None, ext_mode=None, goal_bias=None, step_size=None, k=None):
         '''
         Visualize map with current state of robot and obstacles in the map.
         @param show_map If to show the map or save it.
@@ -155,7 +155,19 @@ class MapEnvironment(object):
         if show_map:
             plt.show()
         else:
-            plt.savefig('map.png')
+            if not os.path.exists('Images'):
+                os.mkdir('Images')
+            
+            if ext_mode=='E1':
+                if k is None:
+                    plt.savefig(f'Images/Map{map}_{planner}_{ext_mode}_GoalBias={goal_bias}.png')
+                else:
+                    plt.savefig(f'Images/Map{map}_{planner}_{ext_mode}_GoalBias={goal_bias}_k={k}.png')
+            else:
+                if k is None:
+                    plt.savefig(f'Images/Map{map}_{planner}_{ext_mode}_GoalBias={goal_bias}_StepSize={step_size}.png')
+                else:
+                    plt.savefig(f'Images/Map{map}_{planner}_{ext_mode}_GoalBias={goal_bias}_StepSize={step_size}_k={k}.png')
 
         return plt
 
