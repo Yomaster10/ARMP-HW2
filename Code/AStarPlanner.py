@@ -12,7 +12,6 @@ class AStarPlanner(object):
         self.open = heapdict.heapdict()
         self.close = heapdict.heapdict()
         self.counter = 0
-        planning_env.visualize_map(True)
 
     def plan(self):
         '''
