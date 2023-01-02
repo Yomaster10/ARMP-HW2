@@ -20,7 +20,7 @@ class RRTStarPlanner(object):
         if planning_env.ylimit[1] < 100:
             self.step_size = 0.2
         else:
-            self.step_size = 5
+            self.step_size = 10
 
     def plan(self):
         '''
@@ -31,6 +31,7 @@ class RRTStarPlanner(object):
         env = self.planning_env
         self.tree.add_vertex(env.start)
 
+        log = False
         if self.k == 0: # log mode
             log = True
 
@@ -125,8 +126,8 @@ class RRTStarPlanner(object):
         print('Total cost of path: {:.3f}'.format(total_cost))
         print('Total time: {:.3f} seconds'.format(total_time))
         
-        update_table = False
-        if update_table:
+        UpdateTable = False
+        if UpdateTable:
             if env.start[0] == 10:
                 map = 'M1'
             elif env.start[0] == 250:
@@ -147,9 +148,7 @@ class RRTStarPlanner(object):
         Compute and return the plan cost, which is the sum of the distances between steps.
         @param plan A given plan for the robot.
         '''
-        # TODO: Task 4.4
-        cost = self.tree.get_vertex_for_state(plan[-1]).cost
-        return cost
+        return self.tree.get_vertex_for_state(plan[-1]).cost
 
     def extend(self, near_state, rand_state):
         '''
@@ -157,7 +156,6 @@ class RRTStarPlanner(object):
         @param near_state The nearest position to the sampled position.
         @param rand_state The sampled position.
         '''
-        # TODO: Task 4.4
         goal = False
         goal_state = self.planning_env.goal
         if (rand_state[0]==goal_state[0] and rand_state[1]==goal_state[1]):
